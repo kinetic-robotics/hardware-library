@@ -611,9 +611,9 @@ void IMU_Init()
 	/* 创建任务 */
 	static osThreadId_t imuTaskHandle;
 	const osThreadAttr_t imuTaskAttributes = {
-		 .name = "imuTask",
-		 .priority = (osPriority_t) osPriorityHigh,
-		 .stack_size = 128 * 4
+			.name = "imuTask",
+			.priority = (osPriority_t) osPriorityHigh,
+			.stack_size = 128 * 4
 	};
 	imuTaskHandle = osThreadNew(IMU_Task, NULL, &imuTaskAttributes);
 	UNUSED(imuTaskHandle);

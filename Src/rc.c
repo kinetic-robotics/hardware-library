@@ -107,9 +107,9 @@ void RC_Init()
 	/* 创建任务 */
 	static osThreadId_t rcTaskHandle;
 	const osThreadAttr_t rcTaskAttributes = {
-	    .name = "rcTask",
-		.priority = (osPriority_t) osPriorityHigh,
-		.stack_size = 128 * 4
+			.name = "rcTask",
+			.priority = (osPriority_t) osPriorityHigh,
+			.stack_size = 128 * 4
 	};
 	rcTaskHandle = osThreadNew(RC_Task, NULL, &rcTaskAttributes);
 	UNUSED(rcTaskHandle);

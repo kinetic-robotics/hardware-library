@@ -173,9 +173,9 @@ void CAN_Init()
 {
 	static osThreadId_t canTaskHandle;
 	const osThreadAttr_t canTaskAttributes = {
-	  .name = "canTask",
-	  .priority = (osPriority_t) osPriorityHigh,
-	  .stack_size = 128 * 4
+			.name = "canTask",
+			.priority = (osPriority_t) osPriorityHigh,
+			.stack_size = 128 * 4
 	};
 	canTaskHandle = osThreadNew(CAN_Task, NULL, &canTaskAttributes);
 	UNUSED(canTaskHandle);
