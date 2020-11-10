@@ -153,7 +153,7 @@ void Motor_Init()
 	/* 注册必要的定频发送报文 */
 	for (size_t i = 0;i<TOOL_GET_ARRAY_LENGTH(infos);i++) {
 		uint16_t packetID = Motor_GetMotorSendID(infos[i].type, infos[i].id);
-		CAN_InitPacket(infos[i].canNum, packetID, 8);
+		CAN_InitPacket(infos[i].canNum, packetID, 8, CONFIG_MOTOR_CAN_HZ);
 	}
 	/* 注册CAN接收回调 */
 	CAN_RegisterCallback(&Motor_CANRxCallback);

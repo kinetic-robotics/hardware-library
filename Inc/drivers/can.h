@@ -21,6 +21,8 @@ typedef struct {
 	uint16_t canID;     /* 帧ID */
 	uint8_t data[8];    /* 帧内容 */
 	uint8_t dataLength; /* 帧内容长度 */
+	uint32_t _interval; /* 发送间隔 */
+	uint32_t _lastTick; /* 上次发送数据的时间 */
 } CAN_SentFrame;
 
 /**
@@ -35,7 +37,7 @@ void CAN_Init();
 void CAN_RegisterCallback(CAN_RxCallback callback);
 void CAN_Send(uint8_t canNum, uint16_t canID, uint8_t* data, uint8_t dataLength);
 void CAN_SetOutput(uint8_t canNum, uint16_t canID, uint8_t arrIndex, uint8_t* value, uint8_t size);
-uint8_t CAN_InitPacket(uint8_t canNum, uint16_t canID, uint8_t dataLength);
+uint8_t CAN_InitPacket(uint8_t canNum, uint16_t canID, uint8_t dataLength, uint16_t hz);
 
 #endif
 #endif /* LIBRARY_DRIVERS_CAN_H_ */
