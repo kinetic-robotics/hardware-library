@@ -51,4 +51,13 @@ void Capacity_Init()
 	CAN_RegisterCallback(&Capacity_CANRxCallback);
 }
 
+/**
+ * 获取超级电容模块数据
+ * @return
+ */
+const Capacity_Info* Capacity_GetData()
+{
+	return &info;
+}
+
 #endif
