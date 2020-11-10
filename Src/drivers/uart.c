@@ -86,10 +86,10 @@ void UART_RX_IT(UART_HandleTypeDef* huart)
 void UART_Init()
 {
 	for(size_t i = 0;i<TOOL_GET_ARRAY_LENGTH(infos);i++) {
-		__HAL_UART_ENABLE_IT(infos[i].huart, UART_IT_IDLE);
 		if(HAL_UART_Receive_DMA(infos[i].huart, infos[i].recvBuffer, infos[i].bufferLength) != HAL_OK) {
 			Library_Error();
 		}
+		__HAL_UART_ENABLE_IT(infos[i].huart, UART_IT_IDLE);
 	}
 }
 

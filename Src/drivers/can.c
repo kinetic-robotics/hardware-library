@@ -84,7 +84,7 @@ void CAN_Send(uint8_t canNum, uint16_t canID, uint8_t* data, uint8_t dataLength)
 	canHeader.RTR = CAN_RTR_DATA;
 	canHeader.DLC = dataLength;
 	CAN_HandleTypeDef* hcan = canNum == CAN_1 ? &hcan1 : &hcan2;
-	while (HAL_CAN_GetTxMailboxesFreeLevel(hcan) != 0) {
+	while (HAL_CAN_GetTxMailboxesFreeLevel(hcan) == 0) {
 		osDelay(1);
 	}
 	HAL_CAN_AddTxMessage(hcan, &canHeader, data, (uint32_t *)CAN_TX_MAILBOX0);
@@ -159,7 +159,7 @@ static void CAN_Task()
 		for(size_t i = 0;i<sendFramesLength;i++) {
 			if (now - sendFrames[i]._lastTick > sendFrames[i]._interval) {
 				CAN_Send(sendFrames[i].canNum, sendFrames[i].canID, sendFrames[i].data, sendFrames[i].dataLength);
-				sendFrames[i]._lastTick = now;
+				sendFrames[i]._lastTick = HAL_GetTick();
 			}
 		}
 		osDelay(5);

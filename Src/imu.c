@@ -31,6 +31,7 @@ static float        gx, gy, gz, ax, ay, az, mx, my, mz;
 static uint32_t     lastUpdate, nowUpdate;               /* Sampling cycle count, ubit ms */
 static IMU_MPUData  mpuData;
 static IMU_Info     info;
+uint32_t a = 0;
 static PID_Info     heatPID;
 
 /**
@@ -595,7 +596,7 @@ static void IMU_Task()
 		IMU_AttitudeUpdate();
 		/* IMU恒温 */
 		PWM_Set(CONFIG_IMU_HEAT_POWER_PIN, PID_Calc(&heatPID, info.temp, CONFIG_IMU_HEAT_TARGET_TEMP));
-		osDelay(10);
+		osDelayUntil(10);
 	}
 }
 
