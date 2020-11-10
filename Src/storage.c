@@ -25,7 +25,7 @@ static uint32_t allDataLength = 0;
  */
 void Storage_Write(uint32_t id, void* data, uint32_t dataLength)
 {
-	if (id > TOOL_GETARRLEN(infos) - 1) return;
+	if (id > TOOL_GET_ARRAY_LENGTH(infos) - 1) return;
 	Flash_Write(infos[id]._address, data, dataLength);
 }
 
@@ -38,7 +38,7 @@ void Storage_Write(uint32_t id, void* data, uint32_t dataLength)
  */
 uint32_t Storage_Read(uint32_t id, void* data, uint32_t dataLength)
 {
-	if (id > TOOL_GETARRLEN(infos) - 1) return 0;
+	if (id > TOOL_GET_ARRAY_LENGTH(infos) - 1) return 0;
 	uint32_t realDataLength = dataLength > infos[id].size ? infos[id].size : dataLength;
 	Flash_Read(infos[id]._address, data, realDataLength);
 	return realDataLength;
@@ -51,7 +51,7 @@ void Storage_Init()
 {
 	uint32_t startAddress = 0;
 	/* 计算所有存储块的地址 */
-	for (size_t i = 0;i<TOOL_GETARRLEN(infos);i++) {
+	for (size_t i = 0;i<TOOL_GET_ARRAY_LENGTH(infos);i++) {
 		infos[i]._address = startAddress;
 		startAddress += infos[i].size;
 		allDataLength += infos[i].size;

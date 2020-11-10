@@ -26,7 +26,7 @@ static uint8_t callbacksLength = 0;
  */
 static uint8_t UART_SearchIndexByHandle(UART_HandleTypeDef* handle)
 {
-	for(size_t i = 0;i<TOOL_GETARRLEN(infos);i++) {
+	for(size_t i = 0;i<TOOL_GET_ARRAY_LENGTH(infos);i++) {
 		if (infos[i].huart == handle) {
 			return i;
 		}
@@ -43,7 +43,7 @@ static uint8_t UART_SearchIndexByHandle(UART_HandleTypeDef* handle)
 void UART_Send(uint8_t id, uint8_t* data, uint8_t dataLength)
 {
 
-	if(id > TOOL_GETARRLEN(infos) - 1) return;
+	if(id > TOOL_GET_ARRAY_LENGTH(infos) - 1) return;
 	HAL_UART_Transmit(infos[id].huart, data, dataLength, HAL_MAX_DELAY);
 }
 
@@ -53,7 +53,7 @@ void UART_Send(uint8_t id, uint8_t* data, uint8_t dataLength)
  */
 void UART_RegisterCallback(UART_RxCallback callback)
 {
-	if (callbacksLength > TOOL_GETARRLEN(callbacks) - 1) {
+	if (callbacksLength > TOOL_GET_ARRAY_LENGTH(callbacks) - 1) {
 		Library_Error();
 		return;
 	}
@@ -85,7 +85,7 @@ void UART_RX_IT(UART_HandleTypeDef* huart)
  */
 void UART_Init()
 {
-	for(size_t i = 0;i<TOOL_GETARRLEN(infos);i++) {
+	for(size_t i = 0;i<TOOL_GET_ARRAY_LENGTH(infos);i++) {
 		__HAL_UART_ENABLE_IT(infos[i].huart, UART_IT_IDLE);
 		if(HAL_UART_Receive_DMA(infos[i].huart, infos[i].recvBuffer, infos[i].bufferLength) != HAL_OK) {
 			Library_Error();

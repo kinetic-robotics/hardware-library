@@ -22,7 +22,7 @@ static GPIO_Info infos[] = CONFIG_GPIO_INFOS;
  */
 void GPIO_Set(uint8_t id, uint8_t value)
 {
-	if (id > TOOL_GETARRLEN(infos) - 1) return;
+	if (id > TOOL_GET_ARRAY_LENGTH(infos) - 1) return;
 	HAL_GPIO_WritePin(infos[id].port, infos[id].pin, value == 1 ? GPIO_PIN_SET : GPIO_PIN_RESET);
 }
 
@@ -33,7 +33,7 @@ void GPIO_Set(uint8_t id, uint8_t value)
  */
 uint8_t GPIO_Get(uint8_t id)
 {
-	if (id > TOOL_GETARRLEN(infos) - 1) return 0;
+	if (id > TOOL_GET_ARRAY_LENGTH(infos) - 1) return 0;
 	GPIO_PinState state = HAL_GPIO_ReadPin(infos[id].port, infos[id].pin);
 	return state == GPIO_PIN_SET ? 1 : 0;
 }

@@ -53,7 +53,7 @@ uint8_t CAN_InitPacket(uint8_t canNum, uint16_t canID, uint8_t dataLength)
 	uint8_t index = CAN_SearchSendFrameIndexByID(canNum, canID);
 	if (index == 0xFF) {
 		/* 超出长度了 */
-		if (sendFramesLength > TOOL_GETARRLEN(sendFrames) - 1) {
+		if (sendFramesLength > TOOL_GET_ARRAY_LENGTH(sendFrames) - 1) {
 			Library_Error();
 			return 0xFF;
 		}
@@ -113,7 +113,7 @@ void CAN_SetOutput(uint8_t canNum, uint16_t canID, uint8_t arrIndex, uint8_t* va
  */
 void CAN_RegisterCallback(CAN_RxCallback callback)
 {
-	if (callbacksLength > TOOL_GETARRLEN(callbacks) - 1) {
+	if (callbacksLength > TOOL_GET_ARRAY_LENGTH(callbacks) - 1) {
 		Library_Error();
 		return;
 	}
