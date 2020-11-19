@@ -13,6 +13,7 @@
 #include "Library/Inc/library.h"
 #include "Library/Inc/tool.h"
 #include "Library/Inc/drivers/uart.h"
+#include <stdlib.h>
 
 static UART_Info infos[] = CONFIG_UART_INFOS;
 /* 回调列表 */
@@ -86,6 +87,7 @@ void UART_RX_IT(UART_HandleTypeDef* huart)
 void UART_Init()
 {
 	for(size_t i = 0;i<TOOL_GET_ARRAY_LENGTH(infos);i++) {
+		infos[i].recvBuffer = malloc(infos[i].bufferLength);
 		if(HAL_UART_Receive_DMA(infos[i].huart, infos[i].recvBuffer, infos[i].bufferLength) != HAL_OK) {
 			Library_Error();
 		}

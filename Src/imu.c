@@ -596,7 +596,7 @@ static void IMU_Task()
 		IMU_AttitudeUpdate();
 		/* IMU恒温 */
 		PWM_Set(CONFIG_IMU_HEAT_POWER_PIN, PID_Calc(&heatPID, info.temp, CONFIG_IMU_HEAT_TARGET_TEMP));
-		osDelayUntil(10);
+		osDelayUntil(1);
 	}
 }
 

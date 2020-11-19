@@ -17,6 +17,7 @@ static RC_Info info;
 
 static void RC_UARTRxCallback(uint8_t id, uint8_t* data, uint16_t dataLength)
 {
+	if (id != CONFIG_RC_UART) return;
 	/* 遥控器包异常 */
 	if (dataLength != RC_DBUS_FRAME_SIZE) {
 		return;

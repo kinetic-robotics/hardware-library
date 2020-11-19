@@ -18,8 +18,8 @@
 
 typedef struct {
 	UART_HandleTypeDef* huart;                     /* UART对象指针 */
-	uint8_t  recvBuffer[CONFIG_UART_BUFFER_MAX_LENGTH];   /* 接收缓冲区 */
-	uint8_t  bufferLength;                         /* 接收缓冲区大小 */
+	uint8_t* recvBuffer;                           /* 接收缓冲区 */
+	uint16_t bufferLength;                         /* 接收缓冲区大小 */
 } UART_Info;
 
 /**
