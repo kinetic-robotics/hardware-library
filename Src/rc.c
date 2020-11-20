@@ -17,6 +17,7 @@ static RC_Info info;
 
 static void RC_UARTRxCallback(uint8_t id, uint8_t* data, uint16_t dataLength)
 {
+	if (id != CONFIG_RC_UART) return;
 	/* 遥控器包异常 */
 	if (dataLength != RC_DBUS_FRAME_SIZE) {
 		return;
@@ -107,9 +108,9 @@ void RC_Init()
 	/* 创建任务 */
 	static osThreadId_t rcTaskHandle;
 	const osThreadAttr_t rcTaskAttributes = {
-	    .name = "rcTask",
-		.priority = (osPriority_t) osPriorityHigh,
-		.stack_size = 128 * 4
+			.name = "rcTask",
+			.priority = (osPriority_t) osPriorityHigh,
+			.stack_size = 128 * 4
 	};
 	rcTaskHandle = osThreadNew(RC_Task, NULL, &rcTaskAttributes);
 	UNUSED(rcTaskHandle);

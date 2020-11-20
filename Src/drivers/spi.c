@@ -24,7 +24,7 @@ static SPI_Info infos[] = CONFIG_SPI_INFOS;
  */
 void SPI_Transmit(uint8_t id, uint8_t *pData, uint16_t size, uint32_t timeout)
 {
-	if (id > TOOL_GETARRLEN(infos) - 1) return;
+	if (id > TOOL_GET_ARRAY_LENGTH(infos) - 1) return;
 	HAL_SPI_Transmit(infos[id].hspi, pData, size, timeout);
 }
 
@@ -37,7 +37,7 @@ void SPI_Transmit(uint8_t id, uint8_t *pData, uint16_t size, uint32_t timeout)
  */
 void SPI_Receive(uint8_t id, uint8_t *pData, uint16_t size, uint32_t timeout)
 {
-	if (id > TOOL_GETARRLEN(infos) - 1) return;
+	if (id > TOOL_GET_ARRAY_LENGTH(infos) - 1) return;
 	HAL_SPI_Receive(infos[id].hspi, pData, size, timeout);
 }
 
@@ -51,7 +51,7 @@ void SPI_Receive(uint8_t id, uint8_t *pData, uint16_t size, uint32_t timeout)
  */
 void SPI_TransmitReceive(uint8_t id, uint8_t *pTxData, uint8_t *pRxData, uint16_t size, uint32_t timeout)
 {
-	if (id > TOOL_GETARRLEN(infos) - 1) return;
+	if (id > TOOL_GET_ARRAY_LENGTH(infos) - 1) return;
 	HAL_SPI_TransmitReceive(infos[id].hspi, pTxData, pRxData, size, timeout);
 }
 

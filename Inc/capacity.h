@@ -26,6 +26,7 @@ typedef struct {
 
 void Capacity_SetPower(float power);
 void Capacity_Init();
+const Capacity_Info* Capacity_GetData();
 
 #endif
 #endif /* CAPACITY_H_ */

@@ -47,8 +47,17 @@ static void Capacity_CANRxCallback(uint8_t canNum, uint16_t canID, uint8_t* data
  */
 void Capacity_Init()
 {
-	CAN_InitPacket(CONFIG_CAPACITY_CAN_NUM, CAPACITY_CAN_RECEIVE_ID, 2);
+	CAN_InitPacket(CONFIG_CAPACITY_CAN_NUM, CAPACITY_CAN_RECEIVE_ID, 2, CONFIG_CAPACITY_HZ);
 	CAN_RegisterCallback(&Capacity_CANRxCallback);
+}
+
+/**
+ * 获取超级电容模块数据
+ * @return
+ */
+const Capacity_Info* Capacity_GetData()
+{
+	return &info;
 }
 
 #endif

@@ -24,7 +24,7 @@ static Motor_Info infos[] = CONFIG_MOTOR_INFOS;
  */
 static uint8_t Motor_SearchInfoIndexByInfo(uint8_t canNum, uint8_t id, uint8_t type)
 {
-	for(size_t i = 0;i<TOOL_GETARRLEN(infos);i++) {
+	for(size_t i = 0;i<TOOL_GET_ARRAY_LENGTH(infos);i++) {
 		if (infos[i].id == id && infos[i].canNum == canNum && (infos[i].type & type) != 0) {
 			return i;
 		}
@@ -59,7 +59,7 @@ static uint16_t Motor_GetMotorSendID(uint8_t type, uint8_t id)
  */
 void Motor_Set(uint8_t id, int16_t current)
 {
-	if (id > TOOL_GETARRLEN(infos) - 1) return;
+	if (id > TOOL_GET_ARRAY_LENGTH(infos) - 1) return;
 	int16_t sendCurrent = current;
 	if (infos[id].state == 0) {
 		sendCurrent = 0;
@@ -128,7 +128,7 @@ static void Motor_CANRxCallback(uint8_t canNum, uint16_t canID, uint8_t* data, u
  */
 void Motor_on()
 {
-	for(size_t i = 0;i<TOOL_GETARRLEN(infos);i++) {
+	for(size_t i = 0;i<TOOL_GET_ARRAY_LENGTH(infos);i++) {
 		infos[i].state = 1;
 	}
 }
@@ -138,7 +138,7 @@ void Motor_on()
  */
 void Motor_off()
 {
-	for(size_t i = 0;i<TOOL_GETARRLEN(infos);i++) {
+	for(size_t i = 0;i<TOOL_GET_ARRAY_LENGTH(infos);i++) {
 		infos[i].state = 0;
 		Motor_Set(i, 0);
 	}
@@ -151,9 +151,9 @@ void Motor_Init()
 {
 	Motor_off();
 	/* 注册必要的定频发送报文 */
-	for (size_t i = 0;i<TOOL_GETARRLEN(infos);i++) {
+	for (size_t i = 0;i<TOOL_GET_ARRAY_LENGTH(infos);i++) {
 		uint16_t packetID = Motor_GetMotorSendID(infos[i].type, infos[i].id);
-		CAN_InitPacket(infos[i].canNum, packetID, 8);
+		CAN_InitPacket(infos[i].canNum, packetID, 8, CONFIG_MOTOR_CAN_HZ);
 	}
 	/* 注册CAN接收回调 */
 	CAN_RegisterCallback(&Motor_CANRxCallback);
@@ -167,7 +167,7 @@ void Motor_Init()
  */
 const Motor_Info* Motor_GetMotorData(uint8_t id)
 {
-	if (id > TOOL_GETARRLEN(infos) - 1) return (const Motor_Info*)0;
+	if (id > TOOL_GET_ARRAY_LENGTH(infos) - 1) return (const Motor_Info*)0;
 	return &infos[id];
 }
 

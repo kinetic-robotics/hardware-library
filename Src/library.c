@@ -11,6 +11,7 @@
 #include "Library/Inc/rc.h"
 #include "Library/Inc/storage.h"
 #include "Library/Inc/capacity.h"
+#include "Library/Inc/referee.h"
 #include "Library/Inc/drivers/driver.h"
 
 /**
@@ -38,5 +39,8 @@ void Library_Init()
 	#endif
 	#ifdef CONFIG_CAPACITY_ENABLE
 		Capacity_Init();
+	#endif
+	#ifdef CONFIG_REFEREE_ENABLE
+		Referee_Init();
 	#endif
 }

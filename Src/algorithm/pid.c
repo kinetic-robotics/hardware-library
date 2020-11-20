@@ -63,9 +63,9 @@ float PID_Calc(PID_Info *pid, float get, float set)
 	pid->iout += pid->i * pid->err[PID_NOW];
 	pid->dout = pid->d * (pid->err[PID_NOW] - pid->err[PID_LAST]);
 
-	TOOL_ABSLIMIT(pid->iout, (float)pid->integralLimit);
+	TOOL_ABS_LIMIT(pid->iout, (float)pid->integralLimit);
 	pid->out = pid->pout + pid->iout + pid->dout;
-	TOOL_ABSLIMIT(pid->out,  (float)pid->maxOutput);
+	TOOL_ABS_LIMIT(pid->out,  (float)pid->maxOutput);
 
 	pid->err[PID_LAST]  = pid->err[PID_NOW];
   

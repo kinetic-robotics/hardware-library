@@ -20,7 +20,7 @@ static PWM_Info infos[] = CONFIG_PWM_INFOS;
  */
 void PWM_Set(uint8_t id, float pulse)
 {
-	if (id > TOOL_GETARRLEN(infos) - 1) return;
+	if (id > TOOL_GET_ARRAY_LENGTH(infos) - 1) return;
 	TOOL_LIMIT(pulse, 0, 100);
 	__HAL_TIM_SetCompare(infos[id].timer, infos[id].channel, 1000 - pulse * 10);
 }
@@ -30,7 +30,7 @@ void PWM_Set(uint8_t id, float pulse)
  */
 void PWM_Init()
 {
-	for(size_t i = 0;i<TOOL_GETARRLEN(infos);i++) {
+	for(size_t i = 0;i<TOOL_GET_ARRAY_LENGTH(infos);i++) {
 		HAL_TIM_PWM_Start(infos[i].timer, infos[i].channel);
 		PWM_Set(i, 0);
 	}

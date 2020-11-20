@@ -46,20 +46,22 @@ static uint8_t CAN_SearchSendFrameIndexByID(uint8_t canNum, uint16_t canID)
  * @param canNum CAN编号,可取值为CAN_1, CAN_2
  * @param canID 帧ID
  * @param dataLength 帧长度
+ * @param hz 发送频率,不可大于200hz
  * @return 数组index
  */
-uint8_t CAN_InitPacket(uint8_t canNum, uint16_t canID, uint8_t dataLength)
+uint8_t CAN_InitPacket(uint8_t canNum, uint16_t canID, uint8_t dataLength, uint16_t hz)
 {
 	uint8_t index = CAN_SearchSendFrameIndexByID(canNum, canID);
 	if (index == 0xFF) {
 		/* 超出长度了 */
-		if (sendFramesLength > TOOL_GETARRLEN(sendFrames) - 1) {
+		if (sendFramesLength > TOOL_GET_ARRAY_LENGTH(sendFrames) - 1) {
 			Library_Error();
 			return 0xFF;
 		}
 		sendFrames[sendFramesLength].canNum = canNum;
 		sendFrames[sendFramesLength].canID = canID;
 		sendFrames[sendFramesLength].dataLength = dataLength;
+		sendFrames[sendFramesLength]._interval  = 1000 / hz;
 		index = sendFramesLength;
 		sendFramesLength++;
 	}
@@ -82,6 +84,9 @@ void CAN_Send(uint8_t canNum, uint16_t canID, uint8_t* data, uint8_t dataLength)
 	canHeader.RTR = CAN_RTR_DATA;
 	canHeader.DLC = dataLength;
 	CAN_HandleTypeDef* hcan = canNum == CAN_1 ? &hcan1 : &hcan2;
+	while (HAL_CAN_GetTxMailboxesFreeLevel(hcan) == 0) {
+		osDelay(1);
+	}
 	HAL_CAN_AddTxMessage(hcan, &canHeader, data, (uint32_t *)CAN_TX_MAILBOX0);
 }
 
@@ -92,14 +97,11 @@ void CAN_Send(uint8_t canNum, uint16_t canID, uint8_t* data, uint8_t dataLength)
  * @param arrIndex 数组序号
  * @param value 数据指针
  * @param size 数据长度
- * @attenction 如果发送这个包之前没有通过InitPacket,本函数会自动以8长度InitPacket!
  */
 void CAN_SetOutput(uint8_t canNum, uint16_t canID, uint8_t arrIndex, uint8_t* value, uint8_t size)
 {
 	uint8_t index = CAN_SearchSendFrameIndexByID(canNum, canID);
-	if (index == 0xFF) {
-		index = CAN_InitPacket(canNum, canID, 8);
-	}
+	if (index == 0xFF) return;
 	memcpy(
 			&sendFrames[index].data[arrIndex],
 			value,
@@ -113,7 +115,7 @@ void CAN_SetOutput(uint8_t canNum, uint16_t canID, uint8_t arrIndex, uint8_t* va
  */
 void CAN_RegisterCallback(CAN_RxCallback callback)
 {
-	if (callbacksLength > TOOL_GETARRLEN(callbacks) - 1) {
+	if (callbacksLength > TOOL_GET_ARRAY_LENGTH(callbacks) - 1) {
 		Library_Error();
 		return;
 	}
@@ -153,10 +155,14 @@ void HAL_CAN_RxFifo0FullCallback(CAN_HandleTypeDef *hcan)
 static void CAN_Task()
 {
 	while(1) {
+		uint32_t now = HAL_GetTick();
 		for(size_t i = 0;i<sendFramesLength;i++) {
-			CAN_Send(sendFrames[i].canNum, sendFrames[i].canID, sendFrames[i].data, sendFrames[i].dataLength);
+			if (now - sendFrames[i]._lastTick > sendFrames[i]._interval) {
+				CAN_Send(sendFrames[i].canNum, sendFrames[i].canID, sendFrames[i].data, sendFrames[i].dataLength);
+				sendFrames[i]._lastTick = HAL_GetTick();
+			}
 		}
-		osDelay(2);
+		osDelay(5);
 	}
 }
 
@@ -167,9 +173,9 @@ void CAN_Init()
 {
 	static osThreadId_t canTaskHandle;
 	const osThreadAttr_t canTaskAttributes = {
-	  .name = "canTask",
-	  .priority = (osPriority_t) osPriorityHigh,
-	  .stack_size = 128 * 4
+			.name = "canTask",
+			.priority = (osPriority_t) osPriorityHigh,
+			.stack_size = 128 * 4
 	};
 	canTaskHandle = osThreadNew(CAN_Task, NULL, &canTaskAttributes);
 	UNUSED(canTaskHandle);
