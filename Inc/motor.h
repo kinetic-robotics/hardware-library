@@ -19,7 +19,7 @@
 /* 电机类型 */
 #define MOTOR_TYPE_RM3508 1
 #define MOTOR_TYPE_RM2006 2
-#define MOTOR_TYPE_RM6020 4
+#define MOTOR_TYPE_RM6020 3
 
 typedef struct {
 	uint8_t canNum;      /* CAN编号,可取值为CAN_1,CAN_2 */
