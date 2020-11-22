@@ -36,23 +36,29 @@ void Ramp_Reset(Ramp_Info *ramp)
 
 /**
  * 斜坡配置函数,会同时重置斜坡参数
- * @param ramp  斜坡数据结构体指针
- * @param scale 经过多少次达到预定值
+ * @param ramp   斜坡数据结构体指针
+ * @param scale  经过多少次达到预定值
+ * @param now    现在的启动值
+ * @param target 目标值
  */
-void Ramp_Setup(Ramp_Info *ramp, int32_t scale)
+void Ramp_Setup(Ramp_Info *ramp, int32_t scale, float start, float target)
 {
 	Ramp_Reset(ramp);
 	ramp->scale = scale;
+	ramp->start = start;
+	ramp->target = target;
 }
 
 /**
  * 斜坡控制结构体初始化
  * @param ramp  斜坡数据结构体指针
  * @param scale 经过多少次达到预定值
+ * @param now    现在的启动值
+ * @param target 目标值
  */
-void Ramp_Init(Ramp_Info *ramp, int32_t scale)
+void Ramp_Init(Ramp_Info *ramp, int32_t scale, float start, float target)
 {
-	Ramp_Setup(ramp, scale);
+	Ramp_Setup(ramp, scale, start, target);
 }
 
 /**
@@ -68,5 +74,5 @@ float Ramp_Calc(Ramp_Info *ramp)
 	if (ramp->count++ >= ramp->scale)
 		ramp->count = ramp->scale;
   
-	return ramp->count / ((float)ramp->scale);
+	return (ramp->target - ramp->start) * (ramp->count / (float)ramp->scale) + ramp->start;
 }

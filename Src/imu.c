@@ -16,7 +16,6 @@
 #include "Library/Inc/tool.h"
 #include "Configurations/library_config.h"
 #include "Library/Inc/drivers/spi.h"
-#include "Library/Inc/drivers/system.h"
 #include "Library/Inc/drivers/gpio.h"
 #include "Library/Inc/drivers/pwm.h"
 #include <string.h>
@@ -136,15 +135,15 @@ static void IMU_ISTRegWriteByMPU(uint8_t addr, uint8_t data)
 {
     /* turn off slave 1 at first */
     IMU_MPUWriteByte(IMU_MPU6500_I2C_SLV1_CTRL, 0x00);
-    System_Delay(2);
+    osDelay(2);
     IMU_MPUWriteByte(IMU_MPU6500_I2C_SLV1_REG, addr);
-    System_Delay(2);
+    osDelay(2);
     IMU_MPUWriteByte(IMU_MPU6500_I2C_SLV1_DO, data);
-    System_Delay(2);
+    osDelay(2);
     /* turn on slave 1 with one byte transmitting */
     IMU_MPUWriteByte(IMU_MPU6500_I2C_SLV1_CTRL, 0x80 | 0x01);
     /* wait longer to ensure the data is transmitted from slave 1 */
-    System_Delay(10);
+    osDelay(10);
 }
 
 /**
@@ -157,13 +156,13 @@ static uint8_t IMU_ISTRegReadByMPU(uint8_t addr)
 {
     uint8_t retval;
     IMU_MPUWriteByte(IMU_MPU6500_I2C_SLV4_REG, addr);
-    System_Delay(10);
+    osDelay(10);
     IMU_MPUWriteByte(IMU_MPU6500_I2C_SLV4_CTRL, 0x80);
-    System_Delay(10);
+    osDelay(10);
     retval = IMU_MPUReadByte(IMU_MPU6500_I2C_SLV4_DI);
     /* turn off slave4 after read */
     IMU_MPUWriteByte(IMU_MPU6500_I2C_SLV4_CTRL, 0x00);
-    System_Delay(10);
+    osDelay(10);
     return retval;
 }
 
@@ -175,31 +174,31 @@ static void IMU_MPUMasteI2CAutoReadConfig(uint8_t device_address, uint8_t reg_ba
 {
     /* configure the device address of the IST8310 use slave1, auto transmit single measure mode */
     IMU_MPUWriteByte(IMU_MPU6500_I2C_SLV1_ADDR, device_address);
-    System_Delay(2);
+    osDelay(2);
     IMU_MPUWriteByte(IMU_MPU6500_I2C_SLV1_REG, IMU_IST8310_R_CONFA);
-    System_Delay(2);
+    osDelay(2);
     IMU_MPUWriteByte(IMU_MPU6500_I2C_SLV1_DO, IMU_IST8310_ODR_MODE);
-    System_Delay(2);
+    osDelay(2);
 
     /* use slave0,auto read data */
     IMU_MPUWriteByte(IMU_MPU6500_I2C_SLV0_ADDR, 0x80 | device_address);
-    System_Delay(2);
+    osDelay(2);
     IMU_MPUWriteByte(IMU_MPU6500_I2C_SLV0_REG, reg_base_addr);
-    System_Delay(2);
+    osDelay(2);
 
     /* every eight mpu6500 internal samples one i2c master read */
     IMU_MPUWriteByte(IMU_MPU6500_I2C_SLV4_CTRL, 0x03);
-    System_Delay(2);
+    osDelay(2);
     /* enable slave 0 and 1 access delay */
     IMU_MPUWriteByte(IMU_MPU6500_I2C_MST_DELAY_CTRL, 0x01 | 0x02);
-    System_Delay(2);
+    osDelay(2);
     /* enable slave 1 auto transmit */
     IMU_MPUWriteByte(IMU_MPU6500_I2C_SLV1_CTRL, 0x80 | 0x01);
 	/* Wait 6ms (minimum waiting time for 16 times internal average setup) */
-    System_Delay(6);
+    osDelay(6);
     /* enable slave 0 with data_num bytes reading */
     IMU_MPUWriteByte(IMU_MPU6500_I2C_SLV0_CTRL, 0x80 | data_num);
-    System_Delay(2);
+    osDelay(2);
 }
 
 /**
@@ -210,60 +209,60 @@ static uint8_t IMU_ISTInit()
 {
 	/* enable iic master mode */
     IMU_MPUWriteByte(IMU_MPU6500_USER_CTRL, 0x30);
-    System_Delay(10);
+    osDelay(10);
 	/* enable iic 400khz */
     IMU_MPUWriteByte(IMU_MPU6500_I2C_MST_CTRL, 0x0d);
-    System_Delay(10);
+    osDelay(10);
 
     /* turn on slave 1 for ist write and slave 4 to ist read */
     IMU_MPUWriteByte(IMU_MPU6500_I2C_SLV1_ADDR, IMU_IST8310_ADDRESS);
-    System_Delay(10);
+    osDelay(10);
     IMU_MPUWriteByte(IMU_MPU6500_I2C_SLV4_ADDR, 0x80 | IMU_IST8310_ADDRESS);
-    System_Delay(10);
+    osDelay(10);
 
     /* IMU_IST8310_R_CONFB 0x01 = device rst */
     IMU_ISTRegWriteByMPU(IMU_IST8310_R_CONFB, 0x01);
-    System_Delay(10);
+    osDelay(10);
     if (IMU_IST8310_DEVICE_ID_A != IMU_ISTRegReadByMPU(IMU_IST8310_WHO_AM_I))
         return 1;
 
 	/* soft reset */
     IMU_ISTRegWriteByMPU(IMU_IST8310_R_CONFB, 0x01);
-    System_Delay(10);
+    osDelay(10);
 
 	/* config as ready mode to access register */
     IMU_ISTRegWriteByMPU(IMU_IST8310_R_CONFA, 0x00);
     if (IMU_ISTRegReadByMPU(IMU_IST8310_R_CONFA) != 0x00)
         return 2;
-    System_Delay(10);
+    osDelay(10);
 
 	/* normal state, no int */
     IMU_ISTRegWriteByMPU(IMU_IST8310_R_CONFB, 0x00);
     if (IMU_ISTRegReadByMPU(IMU_IST8310_R_CONFB) != 0x00)
         return 3;
-    System_Delay(10);
+    osDelay(10);
 
     /* config low noise mode, x,y,z axis 16 time 1 avg */
     IMU_ISTRegWriteByMPU(IMU_IST8310_AVGCNTL, 0x24); //100100
     if (IMU_ISTRegReadByMPU(IMU_IST8310_AVGCNTL) != 0x24)
         return 4;
-    System_Delay(10);
+    osDelay(10);
 
     /* Set/Reset pulse duration setup,normal mode */
     IMU_ISTRegWriteByMPU(IMU_IST8310_PDCNTL, 0xc0);
     if (IMU_ISTRegReadByMPU(IMU_IST8310_PDCNTL) != 0xc0)
         return 5;
-    System_Delay(10);
+    osDelay(10);
 
     /* turn off slave1 & slave 4 */
     IMU_MPUWriteByte(IMU_MPU6500_I2C_SLV1_CTRL, 0x00);
-    System_Delay(10);
+    osDelay(10);
     IMU_MPUWriteByte(IMU_MPU6500_I2C_SLV4_CTRL, 0x00);
-    System_Delay(10);
+    osDelay(10);
 
     /* configure and turn on slave 0 */
     IMU_MPUMasteI2CAutoReadConfig(IMU_IST8310_ADDRESS, IMU_IST8310_R_XL, 0x06);
-    System_Delay(100);
+    osDelay(100);
     return 0;
 }
 
@@ -352,7 +351,7 @@ static void IMU_MPUOffsetCall()
 		mpuData.gy_offset += mpuBuff[10] << 8 | mpuBuff[11];
 		mpuData.gz_offset += mpuBuff[12] << 8 | mpuBuff[13];
 
-		System_Delay(5);
+		osDelay(5);
 	}
 	mpuData.ax_offset=mpuData.ax_offset / 300;
 	mpuData.ay_offset=mpuData.ay_offset / 300;
@@ -369,7 +368,7 @@ static void IMU_MPUOffsetCall()
  */
 static uint8_t IMU_MPUDeviceInit(void)
 {
-	System_Delay(100);
+	osDelay(100);
 	if (IMU_MPUReadByte(IMU_MPU6500_WHO_AM_I) != IMU_MPU6500_WHO_AM_I_VALUE) {
 		return 1;
 	}
@@ -387,7 +386,7 @@ static uint8_t IMU_MPUDeviceInit(void)
 	};
 	for (i = 0; i < 10; i++) {
 		IMU_MPUWriteByte(IMU_MPU6500_Init_Data[i][0], IMU_MPU6500_Init_Data[i][1]);
-		System_Delay(1);
+		osDelay(1);
 	}
 
 	IMU_MPUSetGyroFSR(3);

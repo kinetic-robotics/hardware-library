@@ -11,7 +11,7 @@
 #include "Library/Inc/drivers/pwm.h"
 #include "stm32f4xx_hal.h"
 
-static PWM_Info infos[] = CONFIG_PWM_INFOS;
+PWM_Info infos2[] = CONFIG_PWM_INFOS;
 
 /**
  * 设置PWM输出
@@ -20,9 +20,10 @@ static PWM_Info infos[] = CONFIG_PWM_INFOS;
  */
 void PWM_Set(uint8_t id, float pulse)
 {
-	if (id > TOOL_GET_ARRAY_LENGTH(infos) - 1) return;
+	if (id > TOOL_GET_ARRAY_LENGTH(infos2) - 1) return;
 	TOOL_LIMIT(pulse, 0, 100);
-	__HAL_TIM_SetCompare(infos[id].timer, infos[id].channel, 1000 - pulse * 10);
+	infos2[id].pulse = pulse;
+	__HAL_TIM_SetCompare(infos2[id].timer, infos2[id].channel, __HAL_TIM_GET_AUTORELOAD(infos2[id].timer) * (pulse / 100));
 }
 
 /**
@@ -30,8 +31,8 @@ void PWM_Set(uint8_t id, float pulse)
  */
 void PWM_Init()
 {
-	for(size_t i = 0;i<TOOL_GET_ARRAY_LENGTH(infos);i++) {
-		HAL_TIM_PWM_Start(infos[i].timer, infos[i].channel);
+	for(size_t i = 0;i<TOOL_GET_ARRAY_LENGTH(infos2);i++) {
+		HAL_TIM_PWM_Start(infos2[i].timer, infos2[i].channel);
 		PWM_Set(i, 0);
 	}
 }

@@ -12,8 +12,9 @@
 #ifdef CONFIG_DRIVER_PWM_ENABLE
 
 typedef struct {
-	TIM_HandleTypeDef* timer;      /* 定时器指针 */
-	HAL_TIM_ActiveChannel channel; /* PWM输出通道 */
+	TIM_HandleTypeDef* timer; /* 定时器指针 */
+	uint32_t channel;  		  /* PWM输出通道 */
+	float pulse;			  /* 当前占空比 */
 } PWM_Info;
 
 void PWM_Set(uint8_t id, float pulse);
