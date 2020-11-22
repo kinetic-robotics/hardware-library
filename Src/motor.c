@@ -12,6 +12,8 @@
 #include "Library/Inc/tool.h"
 #include "Configurations/library_config.h"
 #include "Library/Inc/drivers/can.h"
+#include "Library/Inc/drivers/pwm.h"
+#include "Library/Inc/algorithm/ramp.h"
 
 static Motor_Info infos[] = CONFIG_MOTOR_INFOS;
 
@@ -56,21 +58,49 @@ static uint16_t Motor_GetMotorSendID(uint8_t type, uint8_t id)
 
 /**
  * 设置电机输出电流
+ * @param id 电机ID
+ * @param current 电流,无论是什么电机,范围为-10000-10000
  */
 void Motor_Set(uint8_t id, int16_t current)
 {
 	if (id > TOOL_GET_ARRAY_LENGTH(infos) - 1) return;
-	int16_t sendCurrent = current;
+	uint8_t canFlag = 0; /* 是否是CAN报文电机 */
+	float sendCurrent = current;
+	TOOL_ABS_LIMIT(sendCurrent, MOTOR_VIRTUAL_ABS_MAX);
+	switch (infos[id].type) {
+		case MOTOR_TYPE_RM3508:
+			sendCurrent = sendCurrent * (MOTOR_TYPE_RM3508_ABS_MAX / MOTOR_VIRTUAL_ABS_MAX);
+			canFlag = 1;
+			break;
+		case MOTOR_TYPE_RM2006:
+			sendCurrent = sendCurrent * (MOTOR_TYPE_RM2006_ABS_MAX / MOTOR_VIRTUAL_ABS_MAX);
+			canFlag = 1;
+			break;
+		case MOTOR_TYPE_RM6020:
+			sendCurrent = sendCurrent * (MOTOR_TYPE_RM6020_ABS_MAX / MOTOR_VIRTUAL_ABS_MAX);
+			canFlag = 1;
+			break;
+		case MOTOR_TYPE_RM2312:
+			sendCurrent = MOTOR_TYPE_RM2312_MID + sendCurrent * (MOTOR_TYPE_RM2312_ABS_MAX / MOTOR_VIRTUAL_ABS_MAX);
+			break;
+	}
 	if (infos[id].state == 0) {
 		sendCurrent = 0;
 	}
-	uint8_t data[2];
-	data[0] = sendCurrent >> 8;
-	data[1] = sendCurrent & 0xFF;
-	uint16_t packetID = Motor_GetMotorSendID(infos[id].type, infos[id].id);
-	if (packetID != 0) {
-		CAN_SetOutput(infos[id].canNum, packetID, ((infos[id].id - 1) % 4) * 2, data, 2);
+	/* CAN报文电机或PWM电机处理 */
+	if (canFlag == 1) {
+		uint8_t data[2];
+		data[0] = (int16_t)sendCurrent >> 8;
+		data[1] = (int16_t)sendCurrent & 0xFF;
+		uint16_t packetID = Motor_GetMotorSendID(infos[id].type, infos[id].id);
+		if (packetID != 0) {
+			CAN_SetOutput(infos[id].canNum, packetID, ((infos[id].id - 1) % 4) * 2, data, 2);
+		}
+	} else {
+		Ramp_Setup(&infos[id]._ramp, MOTOR_TYPE_RM2312_RAMP_SCALE, infos[id]._lastCurrent, sendCurrent);
+		PWM_Set(infos[id].id, Ramp_Calc(&infos[id]._ramp));
 	}
+	infos[id]._lastCurrent = sendCurrent;
 }
 
 /**
@@ -145,6 +175,22 @@ void Motor_off()
 }
 
 /**
+ * 电机控制任务,一般来说,只用于PWM电机,CAN电机无需开启本任务
+ */
+void Motor_Task()
+{
+	while(1) {
+		for (size_t i = 0;i<TOOL_GET_ARRAY_LENGTH(infos);i++) {
+			/* PWM电机要求斜坡启动 */
+			if (infos[i].type == MOTOR_TYPE_RM2312) {
+				PWM_Set(infos[i].id, Ramp_Calc(&infos[i]._ramp));
+			}
+		}
+		osDelay(10);
+	}
+}
+
+/**
  * 电机初始化
  */
 void Motor_Init()
@@ -153,11 +199,25 @@ void Motor_Init()
 	/* 注册必要的定频发送报文 */
 	for (size_t i = 0;i<TOOL_GET_ARRAY_LENGTH(infos);i++) {
 		uint16_t packetID = Motor_GetMotorSendID(infos[i].type, infos[i].id);
-		CAN_InitPacket(infos[i].canNum, packetID, 8, CONFIG_MOTOR_CAN_HZ);
+		if (packetID != 0) {
+			CAN_InitPacket(infos[i].canNum, packetID, 8, CONFIG_MOTOR_CAN_HZ);
+		} else {
+			/* 解锁PWM电调 */
+			PWM_Set(infos[i].id, MOTOR_TYPE_RM2312_MID);
+			osDelay(1000);
+		}
 	}
 	/* 注册CAN接收回调 */
 	CAN_RegisterCallback(&Motor_CANRxCallback);
 	Motor_on();
+	static osThreadId_t motorTaskHandle;
+	const osThreadAttr_t motorTaskAttributes = {
+			.name = "motorTask",
+			.priority = (osPriority_t) osPriorityHigh,
+			.stack_size = 128 * 4
+	};
+	motorTaskHandle = osThreadNew(Motor_Task, NULL, &motorTaskAttributes);
+	UNUSED(motorTaskHandle);
 }
 
 /**

@@ -10,7 +10,7 @@
 #include "Library/Inc/drivers/uart.h"
 #include "Library/Inc/drivers/spi.h"
 #include "Library/Inc/drivers/gpio.h"
-#include "Library/Inc/drivers/system.h"
+#include "Library/Inc/drivers/pwm.h"
 #include "Library/Inc/drivers/flash.h"
 #include "Configurations/library_config.h"
 
@@ -19,8 +19,6 @@
  */
 void Driver_Init()
 {
-	System_Init();
-
 	#ifdef CONFIG_DRIVER_CAN_ENABLE
 		CAN_Init();
 	#endif
@@ -35,6 +33,10 @@ void Driver_Init()
 
 	#ifdef CONFIG_DRIVER_GPIO_ENABLE
 		GPIO_Init();
+	#endif
+
+	#ifdef CONFIG_DRIVER_PWM_ENABLE
+		PWM_Init();
 	#endif
 
 	#ifdef CONFIG_DRIVER_FLASH_ENABLE
