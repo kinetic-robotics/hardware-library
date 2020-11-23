@@ -5,6 +5,7 @@
  *      Author: xqe2011
  */
 
+#include <Library/Inc/dct/communicate.h>
 #include "Library/Inc/library.h"
 #include "Library/Inc/motor.h"
 #include "Library/Inc/imu.h"
@@ -42,5 +43,8 @@ void Library_Init()
 	#endif
 	#ifdef CONFIG_REFEREE_ENABLE
 		Referee_Init();
+	#endif
+	#ifdef CONFIG_DCT_ENABLE
+		DCT_Communicate_Init();
 	#endif
 }

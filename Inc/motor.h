@@ -20,26 +20,23 @@
 /* 电机类型 */
 #define MOTOR_TYPE_RM3508 1
 #define MOTOR_TYPE_RM2006 2
-#define MOTOR_TYPE_RM6020 3
-#define MOTOR_TYPE_RM2312 4
+#define MOTOR_TYPE_RM6020 4
+#define MOTOR_TYPE_BLHEILS 8
 
 /* 电机电流范围 */
 /* 虚拟最大电流范围 */
-#define MOTOR_VIRTUAL_ABS_MAX     	 10000.0f
+#define MOTOR_VIRTUAL_ABS_MAX     	  10000.0f
 /* RM3508电机最大电流范围绝对值 */
-#define MOTOR_TYPE_RM3508_ABS_MAX 	 16384.0f
+#define MOTOR_TYPE_RM3508_ABS_MAX 	  16384.0f
 /* RM2006电机最大电流范围绝对值 */
-#define MOTOR_TYPE_RM2006_ABS_MAX 	 10000.0f
+#define MOTOR_TYPE_RM2006_ABS_MAX 	  10000.0f
 /* RM6020电机最大电流范围绝对值 */
-#define MOTOR_TYPE_RM6020_ABS_MAX 	 30000.0f
-/* RM2312电机最大电流范围绝对值 */
-#define MOTOR_TYPE_RM2312_ABS_MAX 	 60.0f
+#define MOTOR_TYPE_RM6020_ABS_MAX 	  30000.0f
+/* BLHEILS电机最大电流范围绝对值 */
+#define MOTOR_TYPE_BLHEILS_MAX 	      50.0f
 
-/* RM2312电机中值 */
-#define MOTOR_TYPE_RM2312_MID 	  	 0.0f
-
-/* RM2312电机控制斜坡次数 */
-#define MOTOR_TYPE_RM2312_RAMP_SCALE 300
+/* BLHEILS电机控制斜坡次数 */
+#define MOTOR_TYPE_BLHEILS_RAMP_SCALE 100
 
 typedef struct {
 	uint8_t  canNum;      /* CAN编号,可取值为CAN_1,CAN_2 */

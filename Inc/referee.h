@@ -5,8 +5,8 @@
  *      Author: xqe2011
  */
 
-#ifndef INC_REFEREE_H_
-#define INC_REFEREE_H_
+#ifndef LIBRARY_REFEREE_H_
+#define LIBRARY_REFEREE_H_
 
 #include "Configurations/library_config.h"
 #ifdef CONFIG_REFEREE_ENABLE

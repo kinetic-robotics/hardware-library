@@ -23,6 +23,7 @@
  * @verbatim
  ************************** (C) COPYRIGHT 2018 DJI *************************/
 
+#include <Library/Inc/dct/pid.h>
 #include <stdint.h>
 #include "Library/Inc/tool.h"
 #include "Library/Inc/algorithm/pid.h"
@@ -30,13 +31,15 @@
 /**
  * PID 初始化函数
  * @param pid: PID 结构体
+ * @param isDCTEnable 是否启用DCT功能
+ * @param dctName 若启用DCT输出功能,则该项应该为DCT项名称
  * @param maxOut: 最大输出
  * @param intergralLimit: 积分限幅
  * @param kp 具体 PID 参数
  * @param ki 具体 PID 参数
  * @param kd 具体 PID 参数
  */
-void PID_Create(PID_Info *pid, uint32_t maxOut, uint32_t intergralLimit, float kp, float ki, float kd)
+void PID_Create(PID_Info *pid, uint8_t isDCTEnable, char* dctName, uint32_t maxOut, uint32_t intergralLimit, float kp, float ki, float kd)
 {
 	pid->integralLimit = intergralLimit;
 	pid->maxOutput     = maxOut;
@@ -44,6 +47,12 @@ void PID_Create(PID_Info *pid, uint32_t maxOut, uint32_t intergralLimit, float k
 	pid->p = kp;
 	pid->i = ki;
 	pid->d = kd;
+
+	#ifdef CONFIG_DCT_ENABLE
+		if (isDCTEnable) {
+			DCT_PID_Show(dctName, pid);
+		}
+	#endif
 }
 
 /**
