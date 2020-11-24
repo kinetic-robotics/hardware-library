@@ -47,7 +47,8 @@ float Ramp_RunCalc(Ramp_Info *ramp)
 {
 	if (ramp->count++ >= ramp->scale) {
 		ramp->count = ramp->scale;
+	} else {
+		ramp->now += ramp->everyInc;
 	}
-	ramp->now += ramp->everyInc;
 	return ramp->now;
 }

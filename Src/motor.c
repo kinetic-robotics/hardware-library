@@ -84,6 +84,8 @@ void Motor_Set(uint8_t id, int16_t current)
 			sendCurrent = sendCurrent * (MOTOR_TYPE_BLHEILS_MAX / MOTOR_VIRTUAL_ABS_MAX);
 			/* 不能反转 */
 			TOOL_LIMIT(sendCurrent, 0, MOTOR_TYPE_BLHEILS_MAX);
+			/* 零点偏移 */
+			sendCurrent += MOTOR_TYPE_BLHEILS_ZERO_POINT;
 			break;
 	}
 	if (infos[id].state == 0) {
@@ -100,7 +102,7 @@ void Motor_Set(uint8_t id, int16_t current)
 		}
 	}
 	if (infos[id].type == MOTOR_TYPE_BLHEILS){
-		PWM_Set(infos[id].id, Ramp_Calc(&infos[id]._ramp, 50 + sendCurrent));
+		PWM_Set(infos[id].id, Ramp_Calc(&infos[id]._ramp, sendCurrent));
 	}
 	infos[id]._lastCurrent = sendCurrent;
 }
@@ -197,7 +199,6 @@ void Motor_Task()
  */
 void Motor_Init()
 {
-	Motor_off();
 	/* 注册必要的定频发送报文 */
 	for (size_t i = 0;i<TOOL_GET_ARRAY_LENGTH(infos);i++) {
 		uint16_t packetID = Motor_GetMotorSendID(infos[i].type, infos[i].id);
@@ -206,8 +207,7 @@ void Motor_Init()
 		}
 		/* 解锁BLHEILS,初始化斜坡控制 */
 		if (infos[i].type == MOTOR_TYPE_BLHEILS){
-			Ramp_Init(&infos[i]._ramp, MOTOR_TYPE_BLHEILS_RAMP_SCALE, 50);
-			PWM_Set(infos[i].id, 50);
+			Ramp_Init(&infos[i]._ramp, MOTOR_TYPE_BLHEILS_RAMP_SCALE, MOTOR_TYPE_BLHEILS_ZERO_POINT);
 		}
 	}
 	/* 注册CAN接收回调 */

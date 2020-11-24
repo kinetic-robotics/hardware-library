@@ -556,10 +556,12 @@ static void Referee_Task()
 					/* 初始化状态机变量 */
 					dataLength = 0;
 					cmdID = 0;
-					receivedDataLength = 0;
 					tailCRC = 0;
 					if (data == REFEREE_HEADER_SOF) {
 						flag = REFEREE_STATE_HEADER_LENGTH_HIGH;
+					} else {
+						/* 如果不是SOF就不开始记录内容 */
+						receivedDataLength = 0;
 					}
 					break;
 				case REFEREE_STATE_HEADER_LENGTH_HIGH:

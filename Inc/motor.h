@@ -33,7 +33,10 @@
 /* RM6020电机最大电流范围绝对值 */
 #define MOTOR_TYPE_RM6020_ABS_MAX 	  30000.0f
 /* BLHEILS电机最大电流范围绝对值 */
-#define MOTOR_TYPE_BLHEILS_MAX 	      50.0f
+#define MOTOR_TYPE_BLHEILS_MAX 	      10.0f
+
+/* BLHEILS电机PWM零点 */
+#define MOTOR_TYPE_BLHEILS_ZERO_POINT 75
 
 /* BLHEILS电机控制斜坡次数 */
 #define MOTOR_TYPE_BLHEILS_RAMP_SCALE 100

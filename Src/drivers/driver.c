@@ -12,6 +12,7 @@
 #include "Library/Inc/drivers/gpio.h"
 #include "Library/Inc/drivers/pwm.h"
 #include "Library/Inc/drivers/flash.h"
+#include "Library/Inc/drivers/usb.h"
 #include "Configurations/library_config.h"
 
 /**
@@ -41,5 +42,9 @@ void Driver_Init()
 
 	#ifdef CONFIG_DRIVER_FLASH_ENABLE
 		Flash_Init();
+	#endif
+
+	#ifdef CONFIG_DRIVER_FLASH_ENABLE
+		USB_Init();
 	#endif
 }
