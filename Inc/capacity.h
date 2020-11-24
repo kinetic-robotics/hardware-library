@@ -5,8 +5,8 @@
  *      Author: xqe2011
  */
 
-#ifndef CAPACITY_H_
-#define CAPACITY_H_
+#ifndef LIBRARY_CAPACITY_H_
+#define LIBRARY_CAPACITY_H_
 
 #include "Configurations/library_config.h"
 #ifdef CONFIG_CAPACITY_ENABLE

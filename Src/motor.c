@@ -80,8 +80,12 @@ void Motor_Set(uint8_t id, int16_t current)
 			sendCurrent = sendCurrent * (MOTOR_TYPE_RM6020_ABS_MAX / MOTOR_VIRTUAL_ABS_MAX);
 			canFlag = 1;
 			break;
-		case MOTOR_TYPE_RM2312:
-			sendCurrent = MOTOR_TYPE_RM2312_MID + sendCurrent * (MOTOR_TYPE_RM2312_ABS_MAX / MOTOR_VIRTUAL_ABS_MAX);
+		case MOTOR_TYPE_BLHEILS:
+			sendCurrent = sendCurrent * (MOTOR_TYPE_BLHEILS_MAX / MOTOR_VIRTUAL_ABS_MAX);
+			/* 不能反转 */
+			TOOL_LIMIT(sendCurrent, 0, MOTOR_TYPE_BLHEILS_MAX);
+			/* 零点偏移 */
+			sendCurrent += MOTOR_TYPE_BLHEILS_ZERO_POINT;
 			break;
 	}
 	if (infos[id].state == 0) {
@@ -96,9 +100,9 @@ void Motor_Set(uint8_t id, int16_t current)
 		if (packetID != 0) {
 			CAN_SetOutput(infos[id].canNum, packetID, ((infos[id].id - 1) % 4) * 2, data, 2);
 		}
-	} else {
-		Ramp_Setup(&infos[id]._ramp, MOTOR_TYPE_RM2312_RAMP_SCALE, infos[id]._lastCurrent, sendCurrent);
-		PWM_Set(infos[id].id, Ramp_Calc(&infos[id]._ramp));
+	}
+	if (infos[id].type == MOTOR_TYPE_BLHEILS){
+		PWM_Set(infos[id].id, Ramp_Calc(&infos[id]._ramp, sendCurrent));
 	}
 	infos[id]._lastCurrent = sendCurrent;
 }
@@ -117,7 +121,7 @@ static void Motor_CANRxCallback(uint8_t canNum, uint16_t canID, uint8_t* data, u
 	/* 未注册电机不予处理 */
 	uint8_t index = Motor_SearchInfoIndexByInfo(canNum, id, MOTOR_TYPE_RM3508 | MOTOR_TYPE_RM2006);
 	if (index == 0xFF) {
-		/* 考虑到6020电机的1-4号对应的是3508电机报文的5-8好,所以加一个处理 */
+		/* 考虑到6020电机的1-4号对应的是3508电机报文的5-8号,所以加一个处理 */
 		index = Motor_SearchInfoIndexByInfo(canNum, canID - 0x204, MOTOR_TYPE_RM6020);
 		if (index == 0xFF) return;
 	}
@@ -181,9 +185,9 @@ void Motor_Task()
 {
 	while(1) {
 		for (size_t i = 0;i<TOOL_GET_ARRAY_LENGTH(infos);i++) {
-			/* PWM电机要求斜坡启动 */
-			if (infos[i].type == MOTOR_TYPE_RM2312) {
-				PWM_Set(infos[i].id, Ramp_Calc(&infos[i]._ramp));
+			/* BLHEILS电机要求斜坡启动 */
+			if (infos[i].type == MOTOR_TYPE_BLHEILS) {
+				PWM_Set(infos[i].id, Ramp_RunCalc(&infos[i]._ramp));
 			}
 		}
 		osDelay(10);
@@ -195,16 +199,15 @@ void Motor_Task()
  */
 void Motor_Init()
 {
-	Motor_off();
 	/* 注册必要的定频发送报文 */
 	for (size_t i = 0;i<TOOL_GET_ARRAY_LENGTH(infos);i++) {
 		uint16_t packetID = Motor_GetMotorSendID(infos[i].type, infos[i].id);
 		if (packetID != 0) {
 			CAN_InitPacket(infos[i].canNum, packetID, 8, CONFIG_MOTOR_CAN_HZ);
-		} else {
-			/* 解锁PWM电调 */
-			PWM_Set(infos[i].id, MOTOR_TYPE_RM2312_MID);
-			osDelay(1000);
+		}
+		/* 解锁BLHEILS,初始化斜坡控制 */
+		if (infos[i].type == MOTOR_TYPE_BLHEILS){
+			Ramp_Init(&infos[i]._ramp, MOTOR_TYPE_BLHEILS_RAMP_SCALE, MOTOR_TYPE_BLHEILS_ZERO_POINT);
 		}
 	}
 	/* 注册CAN接收回调 */
