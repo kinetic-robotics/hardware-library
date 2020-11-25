@@ -36,10 +36,16 @@ void USB_Send(uint8_t* data, uint16_t dataLength)
 	if (!USB_IsConnected()) return;
 	/* 针对长度为64的整数倍时的处理,分两包发 */
 	if (dataLength % 64 == 0) {
-		CDC_Transmit_FS(data, dataLength - 1);
-		CDC_Transmit_FS(data + dataLength - 1, 1);
+		while (CDC_Transmit_FS(data, dataLength - 1) != USBD_OK) {
+			osDelay(1);
+		}
+		while (CDC_Transmit_FS(data + dataLength - 1, 1) != USBD_OK) {
+			osDelay(1);
+		}
 	} else {
-		CDC_Transmit_FS(data, dataLength);
+		while (CDC_Transmit_FS(data, dataLength) != USBD_OK) {
+			osDelay(1);
+		}
 	}
 }
 

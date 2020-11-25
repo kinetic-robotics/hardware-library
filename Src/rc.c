@@ -12,8 +12,18 @@
 #include "Library/Inc/rc.h"
 #include "stdlib.h"
 #include "string.h"
+#include "Library/Inc/led.h"
 
 static RC_Info info;
+
+/**
+ * 遥控器失去连接处理
+ */
+static void RC_Timeout()
+{
+	memset(&info, 0, sizeof(info));
+	LED_Off(CONFIG_RC_LED);
+}
 
 static void RC_UARTRxCallback(uint8_t id, uint8_t* data, uint16_t dataLength)
 {
@@ -56,8 +66,8 @@ static void RC_UARTRxCallback(uint8_t id, uint8_t* data, uint16_t dataLength)
 	    (abs(info.ch3) > 660) || \
 	    (abs(info.ch4) > 660))
 	{
-	    memset(&info, 0, sizeof(info));
-	    return ;
+		RC_Timeout();
+	    return;
 	}
 
 	/* 鼠标移动速度获取 */
@@ -77,6 +87,7 @@ static void RC_UARTRxCallback(uint8_t id, uint8_t* data, uint16_t dataLength)
 
 	info.state = RC_OK;
 	info.lastReceiveTime = HAL_GetTick();
+	LED_On(CONFIG_RC_LED);
 }
 
 /**
@@ -93,8 +104,7 @@ void RC_Task()
 	while(1) {
 		/* 遥控器超时 */
 		if (HAL_GetTick() - info.lastReceiveTime > RC_TIMEOUT) {
-			memset(&info, 0, sizeof(info));
-			info.state = 1;
+			RC_Timeout();
 		}
 		osDelay(10);
 	}
@@ -102,8 +112,6 @@ void RC_Task()
 
 void RC_Init()
 {
-	/* 刚启动时默认遥控器未连接 */
-	info.state = 1;
 	UART_RegisterCallback(&RC_UARTRxCallback);
 	/* 创建任务 */
 	static osThreadId_t rcTaskHandle;

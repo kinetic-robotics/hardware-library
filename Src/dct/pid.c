@@ -106,4 +106,18 @@ void DCT_PID_SendInitPacket()
 	DCT_Communicate_Send(DCT_PID_CMD_ID, buffer, TOOL_GET_ARRAY_LENGTH(buffer));
 }
 
+/**
+ * 解析上位机发送的数据
+ * @param cmdID 指令ID
+ * @param data 数据指针
+ * @param dataLength 数据长度
+ */
+void DCT_PID_ParsedData(uint8_t cmdID, uint8_t* data, uint16_t dataLength)
+{
+	/* 请求PID参数包 */
+	if (cmdID == DCT_PID_REQUEST_CMD_ID && dataLength == 0) {
+		DCT_PID_SendInitPacket();
+	}
+}
+
 #endif

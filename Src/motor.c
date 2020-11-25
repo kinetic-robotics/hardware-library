@@ -67,6 +67,9 @@ void Motor_Set(uint8_t id, int16_t current)
 	uint8_t canFlag = 0; /* 是否是CAN报文电机 */
 	float sendCurrent = current;
 	TOOL_ABS_LIMIT(sendCurrent, MOTOR_VIRTUAL_ABS_MAX);
+	if (infos[id].state == 0) {
+		sendCurrent = 0;
+	}
 	switch (infos[id].type) {
 		case MOTOR_TYPE_RM3508:
 			sendCurrent = sendCurrent * (MOTOR_TYPE_RM3508_ABS_MAX / MOTOR_VIRTUAL_ABS_MAX);
@@ -87,9 +90,6 @@ void Motor_Set(uint8_t id, int16_t current)
 			/* 零点偏移 */
 			sendCurrent += MOTOR_TYPE_BLHEILS_ZERO_POINT;
 			break;
-	}
-	if (infos[id].state == 0) {
-		sendCurrent = 0;
 	}
 	/* CAN报文电机或PWM电机处理 */
 	if (canFlag == 1) {
