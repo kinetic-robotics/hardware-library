@@ -23,12 +23,13 @@ static uint16_t recvDataLength = 0;   /* 已经接收到的数据包长度 */
 
 /**
  * 解析DCT协议数据
+ * @param cmdID 指令ID
  * @param data 数据数组指针
  * @param dataLength 数据长度
  */
-static void DCT_ParsedData(uint8_t* data, uint16_t dataLength)
+static void DCT_ParsedData(uint8_t cmdID, uint8_t* data, uint16_t dataLength)
 {
-
+	DCT_PID_ParsedData(cmdID, data, dataLength);
 }
 
 /**
@@ -72,7 +73,7 @@ static void DCT_Communicate_USBRxCallback(uint8_t* dataBuffer, uint32_t dataLeng
 				break;
 			case DCT_STATE_CRC8:
 				if (data == CRC_GetCRC8CheckSum(receivedData, recvDataLength - 1)) {
-					DCT_ParsedData(receivedData + 4, dataLength);
+					DCT_ParsedData(cmdID, receivedData + 4, dataLength);
 				}
 				data = DCT_STATE_SOF;
 				break;

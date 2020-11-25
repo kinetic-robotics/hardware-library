@@ -13,6 +13,7 @@
 #include "Library/Inc/storage.h"
 #include "Library/Inc/capacity.h"
 #include "Library/Inc/referee.h"
+#include "Library/Inc/led.h"
 #include "Library/Inc/drivers/driver.h"
 
 /**
@@ -26,6 +27,10 @@ void Library_Error()
 void Library_Init()
 {
 	Driver_Init();
+	#ifdef CONFIG_LED_ENABLE
+		LED_Init();
+	#endif
+
 	#ifdef CONFIG_STORAGE_ENABLE
 		Storage_Init();
 	#endif

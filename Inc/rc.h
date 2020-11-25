@@ -17,7 +17,7 @@
 #define RC_DBUS_FRAME_SIZE 18
 
 /* 遥控器状态正常 */
-#define RC_OK 0
+#define RC_OK 1
 
 /* 遥控器超时 */
 #define RC_TIMEOUT 150
