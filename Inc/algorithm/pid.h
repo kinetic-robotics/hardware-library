@@ -52,13 +52,12 @@ typedef struct {
  * 		 CONFIG_PID_PID名称_D                 PID中的D
  * 		 CONFIG_PID_PID名称_INTERGRAL_LIMIT   PID中的积分限幅
  * 		 CONFIG_PID_PID名称_MAX_OUTPUT        PID中的最大输出
- * 		 CONFIG_PID_PID名称_DCT_ENABLE        启用DCT输出
  */
 #define PID_CREATE_FROM_CONFIG(name, pid) \
-	PID_Create(pid, CONFIG_PID_##name##_DCT_ENABLE, #name, CONFIG_PID_##name##_MAX_OUTPUT, CONFIG_PID_##name##_INTERGRAL_LIMIT, CONFIG_PID_##name##_P, CONFIG_PID_##name##_I, CONFIG_PID_##name##_D)
+	PID_Create(pid, CONFIG_PID_##name##_MAX_OUTPUT, CONFIG_PID_##name##_INTERGRAL_LIMIT, CONFIG_PID_##name##_P, CONFIG_PID_##name##_I, CONFIG_PID_##name##_D)
 
 
-void PID_Create(PID_Info *pid, uint8_t isDCTEnable, char* dctName, uint32_t maxOut, uint32_t intergralLimit, float kp, float ki, float kd);
+void PID_Create(PID_Info *pid, uint32_t maxOut, uint32_t intergralLimit, float kp, float ki, float kd);
 float PID_Calc(PID_Info *pid, float get, float set);
 void PID_Setup(PID_Info *pid, float kp, float ki, float kd);
 void PID_Reset(PID_Info *pid);
