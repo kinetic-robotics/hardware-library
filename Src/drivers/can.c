@@ -87,7 +87,10 @@ void CAN_Send(uint8_t canNum, uint16_t canID, uint8_t* data, uint8_t dataLength)
 	while (HAL_CAN_GetTxMailboxesFreeLevel(hcan) == 0) {
 		osDelay(1);
 	}
-	HAL_CAN_AddTxMessage(hcan, &canHeader, data, (uint32_t *)CAN_TX_MAILBOX0);
+	uint32_t a = 0;
+	while (HAL_CAN_AddTxMessage(hcan, &canHeader, data, &a) != HAL_OK) {
+		osDelay(1);
+	}
 }
 
 /**
@@ -143,14 +146,24 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 }
 
 /**
- * CAN接收FIFO满中断,理论上是不会调用到的....
+ * CAN错误中断
  */
-void HAL_CAN_RxFifo0FullCallback(CAN_HandleTypeDef *hcan)
+void HAL_CAN_ErrorCallback(CAN_HandleTypeDef *hcan)
 {
-	HAL_CAN_RxFifo0MsgPendingCallback(hcan);
+	/* 如果不是仲裁失败,则取消重发,防止堵塞邮箱 */
+	if (hcan->ErrorCode & HAL_CAN_ERROR_TX_TERR0) {
+		HAL_CAN_AbortTxRequest(hcan, CAN_TX_MAILBOX0);
+	}
+	if (hcan->ErrorCode & HAL_CAN_ERROR_TX_TERR1) {
+		HAL_CAN_AbortTxRequest(hcan, CAN_TX_MAILBOX1);
+	}
+	if (hcan->ErrorCode & HAL_CAN_ERROR_TX_TERR2) {
+		HAL_CAN_AbortTxRequest(hcan, CAN_TX_MAILBOX2);
+	}
 }
 
-/* CAN任务
+/*
+ * CAN任务
  */
 static void CAN_Task()
 {

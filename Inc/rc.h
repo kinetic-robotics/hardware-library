@@ -78,9 +78,6 @@ typedef struct {
   /* 遥控器左侧拨轮数据 */
   int16_t wheel;
 
-  /* 上次接收到遥控器数据的时间 */
-  uint32_t lastReceiveTime;
-
   /* 遥控器状态 */
   uint8_t state;
 } RC_Info;
