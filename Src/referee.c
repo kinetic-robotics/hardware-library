@@ -13,6 +13,7 @@
 #include "Library/Inc/drivers/uart.h"
 #include "Library/Inc/algorithm/crc.h"
 #include "cmsis_os.h"
+#include "queue.h"
 #include <string.h>
 
 static QueueHandle_t uartQueue;/* 串口接收队列 */

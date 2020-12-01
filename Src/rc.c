@@ -13,13 +13,15 @@
 #include "stdlib.h"
 #include "string.h"
 #include "Library/Inc/led.h"
+#include "timers.h"
 
 static RC_Info info;
+static TimerHandle_t timeoutTimer; /* 超时定时器 */
 
 /**
  * 遥控器失去连接处理
  */
-static void RC_Timeout()
+static void RC_Timeout(TimerHandle_t xTimer)
 {
 	memset(&info, 0, sizeof(info));
 	LED_Off(CONFIG_RC_LED);
@@ -66,7 +68,7 @@ static void RC_UARTRxCallback(uint8_t id, uint8_t* data, uint16_t dataLength)
 	    (abs(info.ch3) > 660) || \
 	    (abs(info.ch4) > 660))
 	{
-		RC_Timeout();
+		RC_Timeout(timeoutTimer);
 	    return;
 	}
 
@@ -86,7 +88,7 @@ static void RC_UARTRxCallback(uint8_t id, uint8_t* data, uint16_t dataLength)
 	info.wheel -= 1024;
 
 	info.state = RC_OK;
-	info.lastReceiveTime = HAL_GetTick();
+	xTimerResetFromISR(timeoutTimer, NULL);
 	LED_On(CONFIG_RC_LED);
 }
 
@@ -99,29 +101,11 @@ const RC_Info* RC_GetData()
 	return &info;
 }
 
-void RC_Task()
-{
-	while(1) {
-		/* 遥控器超时 */
-		if (HAL_GetTick() - info.lastReceiveTime > RC_TIMEOUT) {
-			RC_Timeout();
-		}
-		osDelay(10);
-	}
-}
-
 void RC_Init()
 {
+	/* 超时定时器初始化 */
+	timeoutTimer = xTimerCreate("RC_Timeout", RC_TIMEOUT, pdFALSE, 0, RC_Timeout);
 	UART_RegisterCallback(&RC_UARTRxCallback);
-	/* 创建任务 */
-	static osThreadId_t rcTaskHandle;
-	const osThreadAttr_t rcTaskAttributes = {
-			.name = "rcTask",
-			.priority = (osPriority_t) osPriorityHigh,
-			.stack_size = 128 * 4
-	};
-	rcTaskHandle = osThreadNew(RC_Task, NULL, &rcTaskAttributes);
-	UNUSED(rcTaskHandle);
 }
 
 #endif

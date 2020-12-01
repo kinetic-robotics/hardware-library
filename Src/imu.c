@@ -30,7 +30,6 @@ static float        gx, gy, gz, ax, ay, az, mx, my, mz;
 static uint32_t     lastUpdate, nowUpdate;               /* Sampling cycle count, ubit ms */
 static IMU_MPUData  mpuData;
 static IMU_Info     info;
-uint32_t a = 0;
 static PID_Info     heatPID;
 
 /**
@@ -565,10 +564,11 @@ static void IMU_AHRSUpdate()
 static void IMU_AttitudeUpdate()
 {
 	/* yaw    -pi----pi */
-	info.yaw = atan2(2*q1*q2 + 2*q0*q3, -2*q2*q2 - 2*q3*q3 + 1)* 57.3;
-	if (info.yaw < 0) {
-		info.yaw = 360 + info.yaw;
+	float yaw = atan2(2*q1*q2 + 2*q0*q3, -2*q2*q2 - 2*q3*q3 + 1)* 57.3;
+	if (yaw < 0) {
+		yaw += 360;
 	}
+	info.yaw = yaw;
 	/* pitch  -pi/2----pi/2 */
 	info.rol = -asin(-2*q1*q3 + 2*q0*q2)* 57.3;
 	/* roll   -pi----pi  */
@@ -595,7 +595,7 @@ static void IMU_Task()
 		IMU_AttitudeUpdate();
 		/* IMU恒温 */
 		PWM_Set(CONFIG_IMU_HEAT_POWER_PIN, PID_Calc(&heatPID, info.temp, CONFIG_IMU_HEAT_TARGET_TEMP));
-		osDelayUntil(1);
+		osDelay(1);
 	}
 }
 

@@ -39,7 +39,7 @@ static uint8_t Motor_SearchInfoIndexByInfo(uint8_t canNum, uint8_t id, uint8_t t
  */
 static uint16_t Motor_GetMotorSendID(uint8_t type, uint8_t id)
 {
-	if (type == MOTOR_TYPE_RM3508 || type == MOTOR_TYPE_RM2006) {
+	if (type & (MOTOR_TYPE_RM3508 | MOTOR_TYPE_RM2006)) {
 		if (id < 5) {
 			return 0x200;
 		} else {
